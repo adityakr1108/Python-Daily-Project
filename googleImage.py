@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager  # Optional: for auto-installation of ChromeDriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 # Option 2: (Preferred) Using webdriver_manager to automatically handle ChromeDriver installation
