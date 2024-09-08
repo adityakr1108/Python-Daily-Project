@@ -1,5 +1,6 @@
 from turtle import Turtle
 
+from turtle import Turtle
 class Ball(Turtle):
     def __init__(self):
         super().__init__()
@@ -7,15 +8,14 @@ class Ball(Turtle):
         self.color("white")
         self.penup()
         self.goto(0, 0)
-        self.dx = 1
-        self.dy = -1
+        self.x_move = 10
+        self.y_move = 10
 
     def move(self):
-        x = self.xcor()
-        y = self.ycor()
-        if(x > 620 or x < -620):
-            self.dx *= -1
-        if(y > 300 or y < -300):
-            self.dy *= -1
-        self.goto(x + self.dx, y + self.dy)
+       new_x = self.xcor() + self.x_move
+       new_y = self.ycor() + self.y_move
+       self.goto(new_x, new_y)
+       
+    def bounce(self):
+        self.y_move *= -1
         
