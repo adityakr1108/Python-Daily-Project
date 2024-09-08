@@ -3,15 +3,16 @@ import ctypes
 import speech_recognition as sr
 import os
 import pyttsx3
+from googletrans import Translator, LANGUAGES
 
 def initialize_tts():
     """Initializes the text-to-speech engine."""
     engine = pyttsx3.init()
-    # Optionally, set properties like voice, rate, and volume here
     return engine
 
-def speak(text, engine):
+def speak(text, engine, lang='en'):
     """Converts text to speech."""
+    # Set the voice property if needed
     engine.say(text)
     engine.runAndWait()
 
@@ -63,26 +64,52 @@ def invalid_command(engine):
     print(message)
     speak(message, engine)
 
-def process_command(command, engine):
-    """Processes the recognized voice command."""
+def translate_text(text, dest_lang):
+    """Translates text into the desired language."""
+    translator = Translator()
+    translation = translator.translate(text, dest=dest_lang)
+    return translation.text
+
+def process_command(command, engine, lang='en'):
+    """Processes the recognized voice command and translates it."""
     if command in ["lock my pc", "lock"]:
-        lock_workstation(engine)
+        action = "lock_workstation"
     elif command in ["shutdown my pc", "shutdown"]:
-        shutdown_pc(engine)
-        
+        action = "shutdown_pc"
     elif command in ["restart my pc", "restart"]:
-        restart_pc(engine)
+        action = "restart_pc"
     elif command in ["sleep my pc", "sleep"]:
-        sleep_pc(engine)
+        action = "sleep_pc"
     elif command in ["hibernate my pc", "hibernate"]:
-        hibernate_pc(engine)
+        action = "hibernate_pc"
     elif command in ["stop", "exit", "quit"]:
-        stop_script(engine)
+        action = "stop_script"
+    else:
+        action = "invalid_command"
+
+    if action in globals():
+        func = globals()[action]
+        func(engine)
     else:
         invalid_command(engine)
 
-def listen_commands(engine):
-    """Listens for voice commands and processes them."""
+    # Translate response to selected language
+    message = {
+        "lock_workstation": "Locking the workstation.",
+        "shutdown_pc": "Shutting down the PC.",
+        "restart_pc": "Restarting the PC.",
+        "sleep_pc": "Putting the PC to sleep.",
+        "hibernate_pc": "Hibernating the PC.",
+        "stop_script": "Stopping the script.",
+        "invalid_command": "Not a valid command. Please try again."
+    }.get(action, "Unknown command")
+
+    translated_message = translate_text(message, lang)
+    print(f"Translated Message: {translated_message}")
+    speak(translated_message, engine)
+
+def listen_commands(engine, lang='en'):
+    """Listens for voice commands, translates them, and processes them."""
     recognizer = sr.Recognizer()
 
     with sr.Microphone() as source:
@@ -101,19 +128,33 @@ def listen_commands(engine):
             command = recognizer.recognize_google(audio).lower()
             print(f"You said: {command}")
             speak(f"You said: {command}", engine)
-            process_command(command, engine)
+            process_command(command, engine, lang)
         except sr.UnknownValueError:
             message = "I did not understand that. Please try again."
             print(message)
-            speak(message, engine)
+            speak(message, engine, lang)
         except sr.RequestError as e:
             message = f"Could not request results from Google Speech Recognition service; {e}"
             print(message)
-            speak("There was an error with the speech recognition service.", engine)
+            speak("There was an error with the speech recognition service.", engine, lang)
+
+def display_languages():
+    """Displays available languages for translation."""
+    print("Available languages:")
+    for code, name in LANGUAGES.items():
+        print(f"{code}: {name}")
 
 def main():
     engine = initialize_tts()
-    listen_commands(engine)
+    display_languages()
+    
+    # Prompt user to select a language
+    lang = input("Enter the language code for translation (e.g., 'es' for Spanish): ").strip()
+    if lang not in LANGUAGES:
+        print("Invalid language code. Using default language (English).")
+        lang = 'en'
+
+    listen_commands(engine, lang)
 
 if __name__ == "__main__":
     main()
