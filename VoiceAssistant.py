@@ -1,9 +1,9 @@
-import sys
-import ctypes
-import speech_recognition as sr
 import os
+import subprocess
+import speech_recognition as sr
 import pyttsx3
 from googletrans import Translator, LANGUAGES
+from googlesearch import search  # To perform web searches
 
 def initialize_tts():
     """Initializes the text-to-speech engine."""
@@ -12,51 +12,56 @@ def initialize_tts():
 
 def speak(text, engine, lang='en'):
     """Converts text to speech."""
-    # Set the voice property if needed
     engine.say(text)
     engine.runAndWait()
 
-def lock_workstation(engine):
-    """Locks the Windows workstation."""
-    message = "Locking the workstation."
-    print(message)
-    speak(message, engine)
-    ctypes.windll.user32.LockWorkStation()
+def open_application(app_name, engine):
+    """Tries to open an application."""
+    try:
+        message = f"Opening {app_name}."
+        print(message)
+        speak(message, engine)
+        subprocess.Popen(app_name)  # For Windows, pass the full path of the application if needed.
+    except FileNotFoundError:
+        message = f"Could not find the application: {app_name}."
+        print(message)
+        speak(message, engine)
 
-def shutdown_pc(engine):
-    """Shuts down the PC."""
-    message = "Shutting down the PC."
-    print(message)
-    speak(message, engine)
-    os.system("shutdown /s /t 1")
+def search_web(query, engine):
+    """Performs a Google search for the query."""
+    import requests
 
-def restart_pc(engine):
-    """Restarts the PC."""
-    message = "Restarting the PC."
-    print(message)
-    speak(message, engine)
-    os.system("shutdown /r /t 1")
+def search_web(query, engine):
+    """Performs a web search using the Bing Search API."""
+    speak(f"Searching for {query}", engine)
+    print(f"Searching for: {query}")
+    
+    subscription_key = "AIzaSyB3RToH1tIzfeQJ4yULt5PbD6x0vuXSX84"  # Replace with your Bing API key
+    search_url = "https://api.bing.microsoft.com/v7.0/search"
+    headers = {"Ocp-Apim-Subscription-Key": subscription_key}
+    params = {"q": query, "textDecorations": True, "textFormat": "HTML"}
+    
+    try:
+        response = requests.get(search_url, headers=headers, params=params)
+        response.raise_for_status()
+        search_results = response.json()
 
-def sleep_pc(engine):
-    """Puts the PC to sleep."""
-    message = "Putting the PC to sleep."
-    print(message)
-    speak(message, engine)
-    os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+        for result in search_results["webPages"]["value"]:
+            print(result["url"])
+            speak(result["url"], engine)
 
-def hibernate_pc(engine):
-    """Hibernates the PC."""
-    message = "Hibernating the PC."
-    print(message)
-    speak(message, engine)
-    os.system("shutdown /h")
+    except Exception as e:
+        message = f"An error occurred while searching the web: {e}"
+        print(message)
+        speak(message, engine)
+
 
 def stop_script(engine):
     """Stops the script."""
     message = "Stopping the script."
     print(message)
     speak(message, engine)
-    sys.exit(0)
+    return "stop"
 
 def invalid_command(engine):
     """Handles invalid commands."""
@@ -66,47 +71,27 @@ def invalid_command(engine):
 
 def translate_text(text, dest_lang):
     """Translates text into the desired language."""
-    translator = Translator()
-    translation = translator.translate(text, dest=dest_lang)
-    return translation.text
+    try:
+        translator = Translator()
+        translation = translator.translate(text, dest=dest_lang)
+        return translation.text
+    except Exception as e:
+        print(f"Translation failed: {e}")
+        return text  # Return the original text if translation fails
 
 def process_command(command, engine, lang='en'):
-    """Processes the recognized voice command and translates it."""
-    if command in ["lock my pc", "lock"]:
-        action = "lock_workstation"
-    elif command in ["shutdown my pc", "shutdown"]:
-        action = "shutdown_pc"
-    elif command in ["restart my pc", "restart"]:
-        action = "restart_pc"
-    elif command in ["sleep my pc", "sleep"]:
-        action = "sleep_pc"
-    elif command in ["hibernate my pc", "hibernate"]:
-        action = "hibernate_pc"
-    elif command in ["stop", "exit", "quit"]:
-        action = "stop_script"
-    else:
-        action = "invalid_command"
+    """Processes the recognized voice command."""
+    if command in ["stop", "exit", "quit"]:
+        return stop_script(engine)
 
-    if action in globals():
-        func = globals()[action]
-        func(engine)
-    else:
-        invalid_command(engine)
+    # If the command is to open an application
+    if command.startswith("open"):
+        app_name = command.replace("open", "").strip()
+        open_application(app_name, engine)
+        return
 
-    # Translate response to selected language
-    message = {
-        "lock_workstation": "Locking the workstation.",
-        "shutdown_pc": "Shutting down the PC.",
-        "restart_pc": "Restarting the PC.",
-        "sleep_pc": "Putting the PC to sleep.",
-        "hibernate_pc": "Hibernating the PC.",
-        "stop_script": "Stopping the script.",
-        "invalid_command": "Not a valid command. Please try again."
-    }.get(action, "Unknown command")
-
-    translated_message = translate_text(message, lang)
-    print(f"Translated Message: {translated_message}")
-    speak(translated_message, engine)
+    # If the command is none of the above, default to web search
+    search_web(command, engine)
 
 def listen_commands(engine, lang='en'):
     """Listens for voice commands, translates them, and processes them."""
@@ -128,15 +113,16 @@ def listen_commands(engine, lang='en'):
             command = recognizer.recognize_google(audio).lower()
             print(f"You said: {command}")
             speak(f"You said: {command}", engine)
-            process_command(command, engine, lang)
+            if process_command(command, engine, lang) == "stop":
+                break  # Stop the script if stop command is issued
         except sr.UnknownValueError:
             message = "I did not understand that. Please try again."
             print(message)
-            speak(message, engine, lang)
+            speak(message, engine)
         except sr.RequestError as e:
             message = f"Could not request results from Google Speech Recognition service; {e}"
             print(message)
-            speak("There was an error with the speech recognition service.", engine, lang)
+            speak("There was an error with the speech recognition service.", engine)
 
 def display_languages():
     """Displays available languages for translation."""

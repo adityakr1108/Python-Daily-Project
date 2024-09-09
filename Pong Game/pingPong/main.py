@@ -2,7 +2,7 @@ from turtle import Screen, Turtle
 from paddle import Paddle  # Import the Paddle class
 from ball import Ball  # Import the Ball class
 import time
-
+from scoreBoard import Score_Board
 # Screen setup
 screen = Screen()
 screen.bgcolor("black")
@@ -30,7 +30,8 @@ middleDesign()
 
 
 ball = Ball()  # Create the ball
-
+score = Score_Board()
+ # Screen Controls
 screen.listen()
 screen.onkey(R_Paddle.go_up, "Up")
 screen.onkey(R_Paddle.go_down, "Down")
@@ -39,14 +40,27 @@ screen.onkey(L_Paddle.go_down, "s")
 
 # Game loop
 game_is_on = True
+left_score = 0
+right_score = 0
 while game_is_on:
-    time.sleep(0.1)  # Adjusted time to slow down the ball
+    time.sleep(0.06)  # Adjusted time to slow down the ball
     ball.move()
     screen.update()
 
     if ball.ycor() > 320 or ball.ycor() < -320:
-        ball.bounce()
-    if(ball.ycor() == R_Paddle.ycor() and ball.xcor() == R_Paddle.xcor() ) :
-        ball.bounce()
+        ball.bounce_Y()
+    if(ball.distance(R_Paddle) < 50 and ball.xcor() > 600) or (ball.distance(L_Paddle) < 50 and ball.xcor() < -600):
+        ball.bounce_X()
+        ball.increaseSpeed()
+        if(score.l_score == 10 or score.r_score == 10):
+            score.gameReset()
+    if(ball.xcor() > 620):
+        score.update_L_Score()
+        ball.goto(0, 0)
+        ball.bounce_X()
+    if(ball.xcor() < -620):
+        score.update_R_Score()
+        ball.goto(0, 0)
+        ball.bounce_X()
 
 screen.exitonclick()
