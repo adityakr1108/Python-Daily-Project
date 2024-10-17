@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %} | IISER-Kolkata - iGEM 2024{% endblock %}</title>
+    <link
+      href="{{ url_for ('static', filename='/css/flowbite.css')}}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for ('static', filename='/css/katex.css')}}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for ('static', filename='/css/font.css')}}"
+      rel="stylesheet"
+    />
+
+
+    
+    <script src="{{ url_for ('static', filename='/js/tailwind.js')}}"></script>
+    <script src="{{ url_for ('static', filename='/js/flowbite.js')}}"></script>
+    <script src="{{ url_for ('static', filename='/js/katex.min.js')}}"></script>
+
+    
+
+    <link rel="shortcut icon" href="https://static.igem.wiki/teams/5425/foot-on-sole.png"/>
+
+    <!-- <title>IISER || KOLKATA</title> -->
+    <link rel="stylesheet" href="{{ url_for ('static', filename='/css/output.css')}}">
+    <link rel="stylesheet" href="{{ url_for ('static', filename='/css/footer.css')}}">
+    <style>
+      /* For smoother dropdown transition */
+      .dropdown-content {
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      @media(max-width:1020px){
+        .headerBottomLeaf{
+          margin-top:-40px;
+        }
+      }
+    </style>
+  </head>
+
+   {% include 'menu.html' %}
+  {% block page_content %}{% endblock %}
+    {% include 'footer.html' %}
+</main>
+
+    <script>
+      function handleMenu() {
+        const navDialog = document.getElementById("nav-dialog");
+        navDialog.classList.toggle("hidden");
+      }
+
+      function toggleDropdown(id) {
+        const dropdown = document.getElementById(id);
+        dropdown.classList.toggle("hidden");
+      }
+    </script>
+  </body>
+</html>

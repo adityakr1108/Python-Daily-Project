@@ -21,7 +21,7 @@ def open_application(app_name, engine):
         message = f"Opening {app_name}."
         print(message)
         speak(message, engine)
-        subprocess.Popen(app_name)  # For Windows, pass the full path of the application if needed.
+        subprocess.Popen("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Google Chrome.lnk")  # For Windows, pass the full path of the application if needed.
     except FileNotFoundError:
         message = f"Could not find the application: {app_name}."
         print(message)
