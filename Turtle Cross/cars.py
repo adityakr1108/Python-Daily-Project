@@ -1,5 +1,6 @@
 from turtle import Turtle
 import random
+
 import time
 MOVE_DISTANCE = 5
 car_color = ["red", "blue", "green", "yellow", "orange", "purple", "brown", "pink", "cyan",
@@ -12,7 +13,7 @@ class random_cars:
         if random_chance == 1:
             new_car = Turtle()
             new_car.shape("square")
-            new_car.shapesize(stretch_wid=1, stretch_len=3)
+            new_car.shapesize(stretch_wid=1, stretch_len=2)
             new_car.color(random.choice(car_color))
             new_car.penup()
             random_y = random.randint(-250,250)
@@ -21,6 +22,10 @@ class random_cars:
     def move_car(self):
         for car in self.all_cars:
             car.backward(MOVE_DISTANCE)
+    
+    def increaseSpeed(self):
+        global MOVE_DISTANCE
+        MOVE_DISTANCE += 3
 
 
 
