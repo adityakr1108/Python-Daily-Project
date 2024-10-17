@@ -46,4 +46,3 @@ class Snake:
             self.segments[0].setheading(DOWN)
 
 
-
