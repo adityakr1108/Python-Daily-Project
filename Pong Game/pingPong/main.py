@@ -7,7 +7,7 @@ from scoreBoard import Score_Board
 screen = Screen()
 screen.bgcolor("black")
 screen.setup(width=1250, height=600)
-screen.title("Pong Game")
+screen.title("Ping Pong Game")
 screen.tracer(0)
 
 # Create paddles
