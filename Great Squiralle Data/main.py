@@ -5,13 +5,11 @@ color = data["Primary Fur Color"]
 grey = 0
 cinnamon = 0
 
-data_grey = data[data["Primary Fur Color"] == "Gray"] ## total rows which one having grey color
-print(data_grey)
+data_grey = len(data[data["Primary Fur Color"] == "Gray"]) ## total rows which one having grey color
+print("Total no of grey color squirall",data_grey)
 
-# for color in range(0,len(color)):
-#     if(color == Grey):
-#         grey+=1
-#     elif(color == Cinnamon):
-#         cinnamon+=1
 
-# print(grey," ",cinnamon)
+data_cinnamon  = len(data[data["Primary Fur Color"] == "Cinnamon"]) ## total rows which one having cinnamon color
+
+print("Total no cinnamon color squirall",data_cinnamon)
+
