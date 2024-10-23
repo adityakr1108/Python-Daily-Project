@@ -13,3 +13,16 @@ data_cinnamon  = len(data[data["Primary Fur Color"] == "Cinnamon"]) ## total row
 
 print("Total no cinnamon color squirall",data_cinnamon)
 
+data_black  = len(data[data["Primary Fur Color"] == "Black"]) ## total rows which one having  Black color
+
+print("Total no cinnamon color squirall",data_black)
+
+
+data_frame = {
+    "fur Color" : ["Grey","Cinnamon","Black"],
+    "Count" : [data_grey,data_cinnamon,data_black]
+}
+
+df = pd.DataFrame(data_frame)  # for conversion of dictionary to data frame
+
+df.to_csv("squirall_count_through_color.csv")  # for creating a new csv file
