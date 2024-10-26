@@ -60,7 +60,7 @@ while game_is_on:
             ycor = row["y"]
             state_name = row["state"]
             turtle_new.goto(xcor, ycor)
-            turtle_new.color("green")
+            turtle_new.color("red")
             turtle_new.write(state_name,font=("Courier", 12, "bold"))
             turtle_new.color("black")
             found_state = True
