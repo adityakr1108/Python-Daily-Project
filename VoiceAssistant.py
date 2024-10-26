@@ -101,13 +101,14 @@ def open_python_script(file_path, engine):
 def play_game(game_name, engine):
     """Runs a specified game."""
     games = {
-        "hangman": "Hangman\main.py",
-        "turtle cross": "Turtle Cross\main.py",
-        "ping pong": "Pong Game\pingPong\main.py",
-        "snake": "Snake-Game-using-python-main\main.py",
-        "blackbox": "BlackJack-Game-using-python-main\BlackJack-Game-using-python-main\blackbox.py",
-        "state" : "state\main.py"
-    }
+    "hangman": r"Hangman\main.py",
+    "turtle cross": r"Turtle Cross\main.py",
+    "ping pong": r"Ping_Pong\pingPong\main.py",
+    "snake": r"Snake-Game-using-python-main\main.py",
+    "blackbox": r"BlackJack-Game-using-python-main\BlackJack-Game-using-python-main\blackbox.py",
+    "state": r"state\main.py"
+}
+
     if game_name in games:
         open_python_script(games[game_name], engine)
     else:
