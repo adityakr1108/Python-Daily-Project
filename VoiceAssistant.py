@@ -3,12 +3,18 @@ import subprocess
 import speech_recognition as sr
 import pyttsx3
 from googletrans import Translator, LANGUAGES
-from googlesearch import search  
+from googlesearch import search
 
 
 def initialize_tts():
-    """Initializes the text-to-speech engine."""
+    """Initializes the text-to-speech engine and sets it to a female voice if available."""
     engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    # Set to female voice if available
+    for voice in voices:
+        if "female" in voice.name.lower():
+            engine.setProperty('voice', voice.id)
+            break
     return engine
 
 
@@ -19,9 +25,9 @@ def speak(text, engine):
 
 
 def open_application(app_name, engine):
-    """Tries to open an application based on its name."""
+    """Opens an application based on its name."""
     app_paths = {
-        "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+         "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         "brave": r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
         "microsoft edge": r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
         "notepad": r"C:\Windows\System32\notepad.exe",
@@ -30,25 +36,38 @@ def open_application(app_name, engine):
         "r studio": r"C:\Program Files\RStudio\rstudio.exe",
         "tableau": r"C:\Program Files\Tableau\Tableau 2021.2\bin\tableau.exe",
     }
-
     if app_name in app_paths:
-        try:
-            message = f"Opening {app_name}."
-            print(message)
-            speak(message, engine)
-            subprocess.Popen(app_paths[app_name])  # Opens the application from the actual executable path
-        except FileNotFoundError:
-            message = f"Could not find the application: {app_name}."
-            print(message)
-            speak(message, engine)
+        speak(f"Opening {app_name}.", engine)
+        subprocess.Popen(app_paths[app_name])
     else:
-        message = f"I don't know how to open {app_name}."
-        print(message)
-        speak(message, engine)
+        speak(f"I don't know how to open {app_name}.", engine)
+
+
+def open_python_script(file_path, engine):
+    """Opens a specified Python file."""
+    if os.path.exists(file_path):
+        speak("Opening Python file.", engine)
+        subprocess.Popen(["python", file_path], shell=True)
+    else:
+        speak("The specified file path does not exist.", engine)
+
+
+def play_game(game_name, engine):
+    """Runs a specified game."""
+    games = {
+        "hangman": "path_to_hangman_script.py",
+        "turtle cross": "path_to_turtle_cross_script.py",
+        "ping pong": "path_to_ping_pong_script.py",
+        "snake": "path_to_snake_script.py"
+    }
+    if game_name in games:
+        open_python_script(games[game_name], engine)
+    else:
+        speak("Game not available.", engine)
 
 
 def system_command(command, engine):
-    """Handles system commands like shutdown and restart."""
+    """Executes system commands."""
     if command == "shutdown":
         speak("Shutting down the system.", engine)
         os.system("shutdown /s /t 1")
@@ -58,126 +77,105 @@ def system_command(command, engine):
 
 
 def search_web(query, engine):
-    """Performs a Google search for the query using googlesearch-python."""
+    """Performs a web search."""
     speak(f"Searching for {query}", engine)
-    print(f"Searching for: {query}")
-
-    try:
-        for result in search(query, num_results=5):
-            print(result)
-            speak(result, engine)
-    except Exception as e:
-        message = f"An error occurred while searching the web: {e}"
-        print(message)
-        speak(message, engine)
+    for result in search(query, num_results=5):
+        print(result)
+        speak(result, engine)
 
 
 def translate_text(text, dest_lang, engine):
-    """Translates text into the desired language."""
+    """Translates text to the desired language."""
     try:
         translator = Translator()
         translation = translator.translate(text, dest=dest_lang)
         speak(f"Translation: {translation.text}", engine)
-        print(f"Translation: {translation.text}")
-        return translation.text
     except Exception as e:
-        print(f"Translation failed: {e}")
-        speak(f"Translation failed.", engine)
-        return text  # Return the original text if translation fails
+        speak("Translation failed.", engine)
 
 
-def stop_script(engine):
-    """Stops the script."""
-    message = "Stopping the script."
-    print(message)
-    speak(message, engine)
-    return "stop"
+def display_menu(engine):
+    """Displays the main menu options."""
+    menu = """
+    Please choose an option:
+    1. Open an application
+    2. Translate text
+    3. Web search
+    4. Play a game
+    5. System command (shutdown, restart)
+    """
+    print(menu)
+    speak(menu, engine)
 
 
-def process_command(command, engine, recognizer, lang='en'):
-    """Processes the recognized voice command."""
-    
-    if command in ["stop", "exit", "quit"]:
-        return stop_script(engine)
+def process_main_menu_choice(choice, engine, recognizer):
+    """Processes the user choice from the main menu."""
+    if choice == "open an application":
+        speak("Which application would you like to open?", engine)
+        app_name = listen_for_command(recognizer, engine)
+        open_application(app_name.lower(), engine)
 
-    if command in ["shutdown", "restart"]:
-        system_command(command, engine)
-        return
-
-    # If the command is to open an application
-    if command.startswith("open"):
-        app_name = command.replace("open", "").strip().lower()
-        open_application(app_name, engine)
-        return
-
-    # If the command starts with "translate", perform direct translation
-    if command.startswith("translate"):
+    elif choice == "translate text":
         speak("Which language would you like to translate to?", engine)
         for code, name in LANGUAGES.items():
             print(f"{code}: {name}")
+        dest_lang = input("Enter language code: ").strip()
+        speak("What text would you like to translate?", engine)
+        text = listen_for_command(recognizer, engine)
+        translate_text(text, dest_lang, engine)
 
-        lang_code = input("Enter the language code: ").strip()
-        if lang_code in LANGUAGES:
-            text_to_translate = command.replace("translate", "").strip()
-            translate_text(text_to_translate, lang_code, engine)
-        else:
-            speak("Invalid language code.", engine)
-        return
+    elif choice == "web search":
+        speak("What would you like to search for?", engine)
+        query = listen_for_command(recognizer, engine)
+        search_web(query, engine)
 
-    # Otherwise, perform a web search
-    search_web(command, engine)
+    elif choice == "play a game":
+        speak("Which game would you like to play? Options: hangman, turtle cross, ping pong, snake", engine)
+        game_name = listen_for_command(recognizer, engine)
+        play_game(game_name.lower(), engine)
+
+    elif choice == "system command":
+        speak("Which system command would you like to perform? Options: shutdown, restart", engine)
+        command = listen_for_command(recognizer, engine)
+        system_command(command.lower(), engine)
+
+    speak("Would you like to perform another action? Say yes or no.", engine)
+    response = listen_for_command(recognizer, engine)
+    return response.lower() == "yes"
 
 
-def listen_commands(engine, lang='en'):
-    """Listens for voice commands, translates them, and processes them."""
-    recognizer = sr.Recognizer()
-
+def listen_for_command(recognizer, engine):
+    """Listens for a command from the user, with acknowledgment in console and voice."""
+    print("\nListening for a command...")
+    speak("Listening.", engine)
     with sr.Microphone() as source:
         recognizer.adjust_for_ambient_noise(source)
-        print("Voice command system is ready. Say a command.")
-        speak("Voice command system is ready. Say a command.", engine)
-
-    while True:
-        with sr.Microphone() as source:
-            print("\nListening for a command...")
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source)
-            print("Processing...")
-
-        try:
-            command = recognizer.recognize_google(audio).lower()
-            print(f"You said: {command}")
-            speak(f"You said: {command}", engine)
-            if process_command(command, engine, recognizer, lang) == "stop":
-                break  # Stop the script if stop command is issued
-        except sr.UnknownValueError:
-            message = "I did not understand that. Please try again."
-            print(message)
-            speak(message, engine)
-        except sr.RequestError as e:
-            message = f"Could not request results from Google Speech Recognition service; {e}"
-            print(message)
-            speak("There was an error with the speech recognition service.", engine)
-
-
-def display_languages():
-    """Displays available languages for translation."""
-    print("Available languages:")
-    for code, name in LANGUAGES.items():
-        print(f"{code}: {name}")
+        audio = recognizer.listen(source)
+    try:
+        command = recognizer.recognize_google(audio).lower()
+        print(f"User said: {command}")
+        return command
+    except sr.UnknownValueError:
+        speak("I did not understand. Please try again.", engine)
+        return listen_for_command(recognizer, engine)
+    except sr.RequestError:
+        speak("Error with the speech service.", engine)
+        return ""
 
 
 def main():
     engine = initialize_tts()
-    display_languages()
+    recognizer = sr.Recognizer()
 
-    # Prompt user to select a language
-    lang = input("Enter the language code for translation (e.g., 'es' for Spanish): ").strip()
-    if lang not in LANGUAGES:
-        print("Invalid language code. Using default language (English).")
-        lang = 'en'
+    while True:
+        display_menu(engine)
+        speak("Please say your choice.", engine)
+        choice = listen_for_command(recognizer, engine)
+        continue_choice = process_main_menu_choice(choice, engine, recognizer)
 
-    listen_commands(engine, lang)
+        if not continue_choice or choice in ["exit", "stop", "quit"]:
+            speak("Exiting the program.", engine)
+            break
 
 
 if __name__ == "__main__":
