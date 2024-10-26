@@ -209,7 +209,6 @@ def main():
     recognizer = sr.Recognizer()
 
     display_ascii()
-    # Initial noise adjustment
     with sr.Microphone() as source:
         recognizer.adjust_for_ambient_noise(source, duration=0.5)
 
