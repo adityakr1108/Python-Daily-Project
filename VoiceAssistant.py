@@ -55,7 +55,9 @@ def display_ascii():
  |   | ...................................................................... |   | 
  |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___| 
 (_____)                                                                      (_____)
-""")
+
+                        !---Aditya Kumar Agrawal ---!
+           """)
 def initialize_tts():
     """Initializes the text-to-speech engine and sets it to a female voice if available."""
     engine = pyttsx3.init()
