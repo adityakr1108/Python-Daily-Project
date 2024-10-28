@@ -3,6 +3,7 @@ from player import Player
 from cars import random_cars
 from scoreCard import SoreBoard
 import time
+from special_abilities import create_power_ups
 
 screen = Screen()
 screen.tracer(0)
