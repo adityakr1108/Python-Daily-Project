@@ -5,7 +5,8 @@ import pyttsx3
 from googletrans import Translator, LANGUAGES
 from googlesearch import search
 
-import requests # for chatbot
+# for chatbot
+import requests 
 import json
 
 # for database
