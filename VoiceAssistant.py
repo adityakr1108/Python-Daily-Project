@@ -164,9 +164,9 @@ def display_menu(engine):
     """
     print(menu)
     speak(menu, engine)
-    
 
-
+# Starting of chatbot
+# Local LM Studio API URL
 LM_API_URL = "http://192.168.11.97:1234" 
 
 def generate_ai_response(prompt):
