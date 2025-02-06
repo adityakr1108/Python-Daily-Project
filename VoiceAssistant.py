@@ -15,7 +15,6 @@ import sqlite3
 import getpass
 
 
-
 def display_ascii():
     print("""
 #  _____                                                                        _____ 
@@ -255,7 +254,7 @@ def listen_for_command(recognizer, engine):
         # Adjust for ambient noise
         recognizer.adjust_for_ambient_noise(source, duration=0.5)
         # Increased timeout and phrase time limit    timeout=5: The program will wait up to 5 seconds for the user to start speaking.
-        audio = recognizer.listen(source, timeout=3, phrase_time_limit=7)  # Allow 3 seconds of silence and up to 7 seconds for the user to speak
+        audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)  # Allow 3 seconds of silence and up to 7 seconds for the user to speak
     try:
         command = recognizer.recognize_google(audio).lower()
         print(f"User said: {command}")
@@ -316,6 +315,7 @@ def login_user(username, password):
     # Compare the hashed password with the entered one
     if bcrypt.checkpw(password.encode('utf-8'), stored_password):
         print("Login successful!")
+        main()
         return True
     else:
         print("Invalid password!")
