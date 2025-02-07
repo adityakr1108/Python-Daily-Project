@@ -358,6 +358,7 @@ if __name__ == "__main__":
             username = input("Enter your username: ")
             password = getpass.getpass("Enter your password: ")  # Hide the password input
             if login_user(username, password):
+                main()
                 break  # Exit the loop on successful login
         elif action == "admin":
             admin_password_input = getpass.getpass("Enter admin password: ")  # Admin password input
